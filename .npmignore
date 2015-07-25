@@ -4,3 +4,4 @@ Gruntfile.js
 test
 .jscsrc
 _api.js
+karma.conf.js

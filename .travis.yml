@@ -1,4 +1,14 @@
 language: node_js
 node_js:
   - "stable"
-before_install: npm install -g grunt-cli
+install:
+  - npm install -g grunt-cli
+  - npm install karma karma-firefox-launcher karma-chrome-launcher karma-jasmine
+  - npm install
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+script:
+  - grunt
+  - grunt test
+  - ./node_modules/.bin/karma start
