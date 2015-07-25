@@ -11,7 +11,7 @@ Threadify is a browser-side Javascript library that allows you to run any **Java
 Example of the targeted API:
 
 ```javascript
-var myThreadedFunction = threadify(function(thread, param1, param2) {
+var myThreadedFunction = threadify(function(param1, param2) {
     // This is executed in a web worker
     console.log("Hello from the worker");
     return param1 + param2;
