@@ -35,13 +35,13 @@ function Job(workerUrl, args) {
                 _callCallbacks();
                 break;
             case "threadify-custom":
-                //TODO
+                // TODO
                 break;
             case "threadify-error":
-                //TODO
+                // TODO
                 break;
             case "threadify-console":
-                //TODO
+                break; // TODO
         }
     }
 
@@ -70,7 +70,6 @@ function Job(workerUrl, args) {
 
     this._worker = new Worker(workerUrl);
     this._worker.addEventListener("message", _onMessage.bind(this), false);
-
 
     _postMessage(this._worker, {messageType: "threadify-start", args: args});
 }

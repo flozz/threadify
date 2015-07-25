@@ -2,3 +2,5 @@ dist
 Gruntfile.js
 .travis.yml
 test
+.jscsrc
+_api.js

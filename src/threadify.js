@@ -16,9 +16,9 @@ function factory(workerFunction) {
     );
     var workerUrl = URL.createObjectURL(workerBlob);
 
-    return function() {
+    return function () {
         var args = [];
-        for (var i=0 ; i<arguments.length ; i++) {
+        for (var i = 0 ; i < arguments.length ; i++) {
             args.push(arguments[i]);
         }
         return new Job(workerUrl, args);

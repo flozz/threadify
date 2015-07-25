@@ -41,6 +41,13 @@ module.exports = function(grunt) {
             }
         },
 
+        jscs: {
+            src: "src/*.js",
+            options: {
+                config: ".jscsrc"
+            }
+        },
+
         jasmine: {
             pivotal: {
                 src: 'dist/<%= pkg.name %>.js',
@@ -57,9 +64,10 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks("grunt-jscs");
 
     // Default task(s).
     grunt.registerTask('default', ['browserify', 'uglify']);
-    grunt.registerTask('test', ['jshint'/*, 'browserify', 'jasmine'*/]);
+    grunt.registerTask('test', ['jshint', 'jscs', /*, 'browserify', 'jasmine'*/]);
 
 };

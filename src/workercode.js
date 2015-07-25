@@ -29,7 +29,7 @@ module.exports = function (workerFunction) {
             var args = [];
 
             if (arguments.length > 1) {
-                for (var i=1 ; i<arguments.length ; i++) {
+                for (var i = 1 ; i < arguments.length ; i++) {
                     args.push(arguments[i]);
                 }
             }
@@ -45,7 +45,7 @@ module.exports = function (workerFunction) {
     function _argumentsToList(argObject) {
         var args = [];
 
-        for (var i=0 ; i<argObject.length ; i++) {
+        for (var i = 0 ; i < argObject.length ; i++) {
             args.push(argObject[i]);
         }
 
@@ -78,7 +78,7 @@ module.exports = function (workerFunction) {
                 }
                 break;
             case "threadify-custom":
-                // TODO
+                break; // TODO
         }
     }
 
