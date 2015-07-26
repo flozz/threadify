@@ -6,37 +6,118 @@
 
 Threadify is a browser-side Javascript library that allows you to run any **Javascript function** into a **web worker**.
 
-**WORK IN PROGRESS**
-
-Example of the targeted API:
+Example of a threadified function:
 
 ```javascript
-var myThreadedFunction = threadify(function(param1, param2) {
-    // This is executed in a web worker
+var myFunction = threadify(function (param1, param2) {
+    // This will be executed inside a web worker
     console.log("Hello from the worker");
     return param1 + param2;
 });
 
+var job = myFunction("foo", "bar");
 
-var job = myThreadedFunction("foo", "bar");
-
-job.failed = function(error) {
-    console.error(error);
-};
-
-job.done = function(result) {
+job.done = function (result) {
     console.log(result);
-};
-
-job.terminated = function() {
-    console.log("Job is terminated.")
 };
 ```
 
 
-## Haching
+## Getting Threadify
 
-Threadify is built using [Grunt][grunt] and [Browserify][browserify]. To start hacking Threadify, you will have to install fiew tools.
+### Standalone Version
+
+First download the [Threadify zip][dl-zip] or clone the repository.
+
+Then include the `threadify.js` or `threadify.min.js` (from the `dist` folder) in you HTML page:
+
+```html
+<script src="dist/threadify.js"></script>
+```
+
+
+### NPM and Browserify
+
+First install the `threadify` package:
+
+    npm install --save threadify
+
+Then include it where you need it:
+
+```javascript
+var Stone = require("stonejs");
+```
+
+
+## Documentation
+
+### Basics
+
+To run a function in a web worker, you have to threadify it:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    // The code of this function will be executed inside a web worker
+    return param1 + param2;
+});
+```
+
+Then, to run your threadified function, you just have to call it as any other function:
+
+```javascript
+var job = myFunction("param1", "param2");
+```
+
+When you call your threadified function, it returns a `Job` object that allow you to control the worker and to retrieve values returned by the function.
+
+To get the result of your function, just define a `done` callback on the `Job` object:
+
+```javascript
+// this function will be called once the function return something.
+job.done = function (result) {
+    console.log(result);
+};
+```
+
+
+### Job API
+
+You get the `Job` object each time you call a threadified function:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    // The code of this function will be executed inside a web worker
+    return param1 + param2;
+});
+
+var job = myFunction("foo", "bar");
+```
+
+#### Methods
+
+* `job.terminate()`: terminates immediately the worker without letting it an opportunity to finish its operations.
+
+```javascript
+job.terminate();
+```
+
+#### Callbacks
+
+* `job.done = function (result) {}`: called when the threadified function returns something. Please note that the worker is terminated right after it returns the value.
+
+* `job.failed = function (error) {}`: called when an error occurred in the threadified function. Please note that the worker is not always terminated when an error occurred.
+
+* `job.terminated = function () {}`: called when the worker is terminated.
+
+
+### Thread API
+
+TODO
+
+
+## Hacking
+
+Threadify is built using [Grunt][grunt] and [Browserify][browserify]. To start hacking Threadify, you will have to install few tools.
 
 
 ### Installing Dependencies
@@ -84,6 +165,7 @@ Then, open the following page in your web browser:
 
 
 
+[dl-zip]: https://github.com/flozz/threadify/archive/master.zip
 [grunt]: http://gruntjs.com/
 [browserify]: http://browserify.org/
 [nodejs]: https://nodejs.org/
