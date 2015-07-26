@@ -98,7 +98,7 @@ var myFunction = threadify(function (param1, param2) {
 });
 ```
 
-Be careful of the `this` context when you call `this.return()` from a callback. For instance, the following code will not work because of the wrong `this` context:
+Be careful of the `this` context when you call `this.return()` from a callback. For instance, the following code **will not work** because of the wrong `this` context:
 
 ```javascript
 var myFunction = threadify(function (param1, param2) {
@@ -108,7 +108,7 @@ var myFunction = threadify(function (param1, param2) {
 });
 ```
 
-To fix it, you can modify the code like this:
+To fix it, you can modify it like this:
 
 ```javascript
 var myFunction = threadify(function (param1, param2) {
@@ -156,7 +156,21 @@ job.terminate();
 
 ## Thread API
 
-TODO
+Inside the threadified function, you have access to a `Thread` object through the `this` context.
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    var thread = this;
+});
+```
+
+### Methods
+
+* `thread.terminate()`: terminates immediately the worker.
+
+* `thread.error(error)`: Reports an error (this will calls the `job.failed` callback function). Please not that calling this method will not terminate the worker.
+
+* `thread.return(param [, param2 [, ...]])`: return one or more values (this will call the `job.done` callback function) and terminates the worker.
 
 
 ## Hacking
