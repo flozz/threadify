@@ -23,9 +23,11 @@ job.done = function (result) {
 ```
 
 
-## Getting Threadify
+## Getting Started
 
-### Standalone Version
+### Getting Threadify
+
+#### Standalone Version
 
 First download the [Threadify zip][dl-zip] or clone the repository.
 
@@ -36,7 +38,7 @@ Then include the `threadify.js` or `threadify.min.js` (from the `dist` folder) i
 ```
 
 
-### NPM and Browserify
+#### NPM and Browserify
 
 First install the `threadify` package:
 
@@ -49,9 +51,7 @@ var Stone = require("stonejs");
 ```
 
 
-## Documentation
-
-### Basics
+### Threadify a Function
 
 To run a function in a web worker, you have to threadify it:
 
@@ -80,7 +80,7 @@ job.done = function (result) {
 ```
 
 
-### Job API
+## Job API
 
 You get the `Job` object each time you call a threadified function:
 
@@ -93,7 +93,7 @@ var myFunction = threadify(function (param1, param2) {
 var job = myFunction("foo", "bar");
 ```
 
-#### Methods
+### Methods
 
 * `job.terminate()`: terminates immediately the worker without letting it an opportunity to finish its operations.
 
@@ -101,7 +101,7 @@ var job = myFunction("foo", "bar");
 job.terminate();
 ```
 
-#### Callbacks
+### Callbacks
 
 * `job.done = function (result) {}`: called when the threadified function returns something. Please note that the worker is terminated right after it returns the value.
 
@@ -110,7 +110,7 @@ job.terminate();
 * `job.terminated = function () {}`: called when the worker is terminated.
 
 
-### Thread API
+## Thread API
 
 TODO
 
