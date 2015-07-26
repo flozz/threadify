@@ -35,15 +35,20 @@ function Job(workerUrl, args) {
                 results.done = data.args;
                 _callCallbacks();
                 break;
-            case "threadify-custom":
-                //TODO
-                break;
             case "threadify-error":
-                //TODO
+                results.failed = data.args;
+                _callCallbacks();
                 break;
-            case "threadify-console":
-                //TODO
+            case "threadify-terminated":
+                results.terminated = [];
+                _callCallbacks();
         }
+    }
+
+    function _onError(error) {
+        results.failed = [error];
+        _callCallbacks();
+        terminate();
     }
 
     function _callCallbacks() {
@@ -55,11 +60,15 @@ function Job(workerUrl, args) {
         }
     }
 
+    function terminate() {
+        _this._worker.terminate();
+        results.terminated = [];
+        _callCallbacks();
+    }
+
     Object.defineProperty(this, "done", {
         get: function () {
-            if (callbacks.done) {
-                return callbacks.done;
-            }
+            return callbacks.done;
         },
         set: function (fn) {
             callbacks.done = fn;
@@ -69,9 +78,36 @@ function Job(workerUrl, args) {
         configurable: false
     });
 
-    this._worker = new Worker(workerUrl);
-    this._worker.addEventListener("message", _onMessage.bind(this), false);
+    Object.defineProperty(this, "failed", {
+        get: function () {
+            return callbacks.failed;
+        },
+        set: function (fn) {
+            callbacks.failed = fn;
+            _callCallbacks();
+        },
+        enumerable: true,
+        configurable: false
+    });
 
+    Object.defineProperty(this, "terminated", {
+        get: function () {
+            return callbacks.terminated;
+        },
+        set: function (fn) {
+            callbacks.terminated = fn;
+            _callCallbacks();
+        },
+        enumerable: true,
+        configurable: false
+    });
+
+    this.terminate = terminate;
+
+    this._worker = new Worker(workerUrl);
+
+    this._worker.addEventListener("message", _onMessage.bind(this), false);
+    this._worker.addEventListener("error", _onError.bind(this), false);
 
     _postMessage(this._worker, {messageType: "threadify-start", args: args});
 }
@@ -97,9 +133,9 @@ function factory(workerFunction) {
     );
     var workerUrl = URL.createObjectURL(workerBlob);
 
-    return function() {
+    return function () {
         var args = [];
-        for (var i=0 ; i<arguments.length ; i++) {
+        for (var i = 0 ; i < arguments.length ; i++) {
             args.push(arguments[i]);
         }
         return new Job(workerUrl, args);
@@ -115,9 +151,15 @@ module.exports = factory;
 
 module.exports = function (workerFunction) {
 
+    var _worker = this;
+
     var thread = {
         terminate: function () {
-            this.close();
+            _postMessage({
+                messageType: "threadify-terminated",
+                args: []
+            });
+            _worker.close();
         },
 
         error: function () {
@@ -125,7 +167,6 @@ module.exports = function (workerFunction) {
                 messageType: "threadify-error",
                 args: _argumentsToList(arguments)
             });
-            this.close();
         },
 
         return: function () {
@@ -133,30 +174,14 @@ module.exports = function (workerFunction) {
                 messageType: "threadify-return",
                 args: _argumentsToList(arguments)
             });
-            this.close();
-        },
-
-        postMessage: function (name) {
-            var args = [];
-
-            if (arguments.length > 1) {
-                for (var i=1 ; i<arguments.length ; i++) {
-                    args.push(arguments[i]);
-                }
-            }
-
-            _postMessage({
-                messageType: "threadify-custom",
-                name: name,
-                args: args
-            });
+            thread.terminate();
         }
     };
 
     function _argumentsToList(argObject) {
         var args = [];
 
-        for (var i=0 ; i<argObject.length ; i++) {
+        for (var i = 0 ; i < argObject.length ; i++) {
             args.push(argObject[i]);
         }
 
@@ -179,17 +204,20 @@ module.exports = function (workerFunction) {
 
         switch (data.messageType) {
             case "threadify-start":
-                var result = workerFunction.apply(thread, data.args);
+                var result;
+                try {
+                    result = workerFunction.apply(thread, data.args);
+                } catch (error) {
+                    thread.error(error);
+                    thread.terminate();
+                }
                 if (result !== undefined) {
                     _postMessage({
                         messageType: "threadify-return",
                         args: [result]
                     });
-                    this.close();
+                    thread.terminate();
                 }
-                break;
-            case "threadify-custom":
-                // TODO
         }
     }
 

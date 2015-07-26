@@ -4,9 +4,15 @@
 
 module.exports = function (workerFunction) {
 
+    var _worker = this;
+
     var thread = {
         terminate: function () {
-            this.close();
+            _postMessage({
+                messageType: "threadify-terminated",
+                args: []
+            });
+            _worker.close();
         },
 
         error: function () {
@@ -14,7 +20,6 @@ module.exports = function (workerFunction) {
                 messageType: "threadify-error",
                 args: _argumentsToList(arguments)
             });
-            this.close();
         },
 
         return: function () {
@@ -22,23 +27,7 @@ module.exports = function (workerFunction) {
                 messageType: "threadify-return",
                 args: _argumentsToList(arguments)
             });
-            this.close();
-        },
-
-        postMessage: function (name) {
-            var args = [];
-
-            if (arguments.length > 1) {
-                for (var i = 1 ; i < arguments.length ; i++) {
-                    args.push(arguments[i]);
-                }
-            }
-
-            _postMessage({
-                messageType: "threadify-custom",
-                name: name,
-                args: args
-            });
+            thread.terminate();
         }
     };
 
@@ -68,17 +57,20 @@ module.exports = function (workerFunction) {
 
         switch (data.messageType) {
             case "threadify-start":
-                var result = workerFunction.apply(thread, data.args);
+                var result;
+                try {
+                    result = workerFunction.apply(thread, data.args);
+                } catch (error) {
+                    thread.error(error);
+                    thread.terminate();
+                }
                 if (result !== undefined) {
                     _postMessage({
                         messageType: "threadify-return",
                         args: [result]
                     });
-                    this.close();
+                    thread.terminate();
                 }
-                break;
-            case "threadify-custom":
-                break; // TODO
         }
     }
 

@@ -34,15 +34,20 @@ function Job(workerUrl, args) {
                 results.done = data.args;
                 _callCallbacks();
                 break;
-            case "threadify-custom":
-                // TODO
-                break;
             case "threadify-error":
-                // TODO
+                results.failed = data.args;
+                _callCallbacks();
                 break;
-            case "threadify-console":
-                break; // TODO
+            case "threadify-terminated":
+                results.terminated = [];
+                _callCallbacks();
         }
+    }
+
+    function _onError(error) {
+        results.failed = [error];
+        _callCallbacks();
+        terminate();
     }
 
     function _callCallbacks() {
@@ -54,11 +59,15 @@ function Job(workerUrl, args) {
         }
     }
 
+    function terminate() {
+        _this._worker.terminate();
+        results.terminated = [];
+        _callCallbacks();
+    }
+
     Object.defineProperty(this, "done", {
         get: function () {
-            if (callbacks.done) {
-                return callbacks.done;
-            }
+            return callbacks.done;
         },
         set: function (fn) {
             callbacks.done = fn;
@@ -68,8 +77,36 @@ function Job(workerUrl, args) {
         configurable: false
     });
 
+    Object.defineProperty(this, "failed", {
+        get: function () {
+            return callbacks.failed;
+        },
+        set: function (fn) {
+            callbacks.failed = fn;
+            _callCallbacks();
+        },
+        enumerable: true,
+        configurable: false
+    });
+
+    Object.defineProperty(this, "terminated", {
+        get: function () {
+            return callbacks.terminated;
+        },
+        set: function (fn) {
+            callbacks.terminated = fn;
+            _callCallbacks();
+        },
+        enumerable: true,
+        configurable: false
+    });
+
+    this.terminate = terminate;
+
     this._worker = new Worker(workerUrl);
+
     this._worker.addEventListener("message", _onMessage.bind(this), false);
+    this._worker.addEventListener("error", _onError.bind(this), false);
 
     _postMessage(this._worker, {messageType: "threadify-start", args: args});
 }
