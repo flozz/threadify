@@ -222,6 +222,12 @@ Then, open the following page in your web browser:
 * `test/SpecRunner.html`
 
 
+## Changelog
+
+* **0.1.0:**
+  * First release: basic functionalities required to build and run workers
+
+
 
 [dl-zip]: https://github.com/flozz/threadify/archive/master.zip
 [grunt]: http://gruntjs.com/
