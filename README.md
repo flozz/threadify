@@ -47,11 +47,11 @@ First install the `threadify` package:
 Then include it where you need it:
 
 ```javascript
-var Stone = require("stonejs");
+var threadify = require("threadify");
 ```
 
 
-### Threadify a Function
+### Threadifying a Function
 
 To run a function in a web worker, you have to threadify it:
 
@@ -78,6 +78,50 @@ job.done = function (result) {
     console.log(result);
 };
 ```
+
+
+### Returning Values
+
+The simplest way to return a value from the threadified function is to use the `return` keyword as usual:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    return param1 + param2;
+});
+```
+
+But if you have asynchrone code in your function (or if you want to return more than one value), you will not be able to use the `return` keyword. But you can use the `this.return()` method instead:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    this.return(param1, param2);
+});
+```
+
+Be careful of the `this` context when you call `this.return()` from a callback. For instance, the following code will not work because of the wrong `this` context:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    setTimeout(function () {
+        this.return(param1, param2);
+    }, 1000);
+});
+```
+
+To fix it, you can modify the code like this:
+
+```javascript
+var myFunction = threadify(function (param1, param2) {
+    var thread = this;
+    setTimeout(function () {
+        thread.return(param1, param2);
+    }, 1000);
+});
+```
+
+The worker still alive until you return something or you terminate it explicitly.
+
+**NOTE:** if you just use the `return` keyword without any value, the worker will not be terminated.
 
 
 ## Job API
