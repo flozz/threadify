@@ -1,9 +1,15 @@
 module.exports =  {
 
-    // /!\ This function should be duplicated in the worker code
     serializeArgs: function (args) {
         var serializedArgs = [];
         var transferrable = [];
+
+        for (var i = 0 ; i < args.length ; i++) {
+            serializedArgs .push({
+                type: "arg",
+                value: args[i]
+            });
+        }
 
         return {
             args: serializedArgs,
@@ -11,10 +17,16 @@ module.exports =  {
         };
     },
 
-    // /!\ This function should be duplicated in the worker code
-    unserializeArgs: function (args) {
-        var unserializedArgs = [];
+    unserializeArgs: function (serializedArgs) {
+        var args = [];
 
-        return unserializedArgs;
+        for (var i = 0 ; i < serializedArgs.length ; i++) {
+
+            if (serializedArgs[i].type == "arg") {
+                args.push(serializedArgs[i].value);
+            }
+        }
+
+        return args;
     }
 };

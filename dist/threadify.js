@@ -1,4 +1,40 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.threadify = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports =  {
+
+    serializeArgs: function (args) {
+        var serializedArgs = [];
+        var transferrable = [];
+
+        for (var i = 0 ; i < args.length ; i++) {
+            serializedArgs .push({
+                type: "arg",
+                value: args[i]
+            });
+        }
+
+        return {
+            args: serializedArgs,
+            transferrable: transferrable
+        };
+    },
+
+    unserializeArgs: function (serializedArgs) {
+        var args = [];
+
+        for (var i = 0 ; i < serializedArgs.length ; i++) {
+
+            if (serializedArgs[i].type == "arg") {
+                args.push(serializedArgs[i].value);
+            }
+        }
+
+        return args;
+    }
+};
+
+},{}],2:[function(require,module,exports){
+var helpers = require("./helpers.js");
+
 function Job(workerUrl, args) {
 
     var _this = this;
@@ -15,33 +51,32 @@ function Job(workerUrl, args) {
         terminated: null
     };
 
-    function _postMessage(data) {
-        // TODO add support of transferrable objects
+    function _postMessage(name, args) {
+        var serialized = helpers.serializeArgs(args || []);
 
-        var transferrable = [];
-        data = data || {};
-        data.args = data.args || [];
+        var data = {
+            name: name,
+            args: serialized.args
+        };
 
-        _this._worker.postMessage(data, transferrable);
+        _this._worker.postMessage(data, serialized.transferrable);
     }
 
     function _onMessage(event) {
         var data = event.data || {};
-        data.args = data.args || [];
+        var args = helpers.unserializeArgs(data.args || []);
 
-        switch (data.messageType) {
+        switch (data.name) {
             case "threadify-return":
-                results.done = data.args;
-                _callCallbacks();
+                results.done = args;
                 break;
             case "threadify-error":
-                results.failed = data.args;
-                _callCallbacks();
+                results.failed = args;
                 break;
             case "threadify-terminated":
                 results.terminated = [];
-                _callCallbacks();
         }
+        _callCallbacks();
     }
 
     function _onError(error) {
@@ -108,12 +143,13 @@ function Job(workerUrl, args) {
     this._worker.addEventListener("message", _onMessage.bind(this), false);
     this._worker.addEventListener("error", _onError.bind(this), false);
 
-    _postMessage({messageType: "threadify-start", args: args});
+    _postMessage("threadify-start", args);
 }
 
 module.exports = Job;
 
-},{}],2:[function(require,module,exports){
+},{"./helpers.js":1}],3:[function(require,module,exports){
+var helpers = require("./helpers.js");
 var Job = require("./job.js");
 var workerCode = require("./workercode.js");
 
@@ -124,6 +160,10 @@ function factory(workerFunction) {
             workerCode.toString(),
             ")(",
             workerFunction.toString(),
+            ",",
+            helpers.serializeArgs.toString(),
+            ",",
+            helpers.unserializeArgs.toString(),
             ");"
         ],
         {
@@ -143,78 +183,57 @@ function factory(workerFunction) {
 
 module.exports = factory;
 
-},{"./job.js":1,"./workercode.js":3}],3:[function(require,module,exports){
+},{"./helpers.js":1,"./job.js":2,"./workercode.js":4}],4:[function(require,module,exports){
 //
 // This file contains the code that will be injected inside the web worker
 //
 
-module.exports = function (workerFunction) {
+module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
 
     var _worker = this;
 
     var thread = {
         terminate: function () {
-            _postMessage({
-                messageType: "threadify-terminated",
-                args: []
-            });
+            _postMessage("threadify-terminated", []);
             _worker.close();
         },
 
         error: function () {
-            _postMessage({
-                messageType: "threadify-error",
-                args: _argumentsToList(arguments)
-            });
+            _postMessage("threadify-error", arguments);
         },
 
         return: function () {
-            _postMessage({
-                messageType: "threadify-return",
-                args: _argumentsToList(arguments)
-            });
+            _postMessage("threadify-return", arguments);
             thread.terminate();
         }
     };
 
-    function _argumentsToList(argObject) {
-        var args = [];
+    function _postMessage(name, args) {
+        var serialized = serializeArgs(args || []);
 
-        for (var i = 0 ; i < argObject.length ; i++) {
-            args.push(argObject[i]);
-        }
+        var data = {
+            name: name,
+            args: serialized.args
+        };
 
-        return args;
-    }
-
-    function _postMessage(data) {
-        // TODO add support of transferrable objects
-
-        var transferrable = [];
-        data = data || {};
-        data.args = data.args || [];
-
-        this.postMessage(data, transferrable);
+        this.postMessage(data, serialized.transferrable);
     }
 
     function _onMessage(event) {
         var data = event.data || {};
-        data.args = data.args || [];
+        var args = unserializeArgs(data.args || []);
 
-        switch (data.messageType) {
+        switch (data.name) {
             case "threadify-start":
                 var result;
                 try {
-                    result = workerFunction.apply(thread, data.args);
+                    result = workerFunction.apply(thread, args);
                 } catch (error) {
                     thread.error(error);
                     thread.terminate();
                 }
                 if (result !== undefined) {
-                    _postMessage({
-                        messageType: "threadify-return",
-                        args: [result]
-                    });
+                    _postMessage("threadify-return", [result]);
                     thread.terminate();
                 }
         }
@@ -223,5 +242,5 @@ module.exports = function (workerFunction) {
     this.addEventListener("message", _onMessage, false);
 };
 
-},{}]},{},[2])(2)
+},{}]},{},[3])(3)
 });
