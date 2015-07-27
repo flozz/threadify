@@ -3,6 +3,7 @@ module.exports = function(config) {
         frameworks: ['jasmine'],
         files: [
             'dist/threadify.js',
+            'test/_tmp/helpers.js',
             'test/*Spec.js'
         ],
         reporters: ['progress'],
