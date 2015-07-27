@@ -38,6 +38,7 @@ var helpers = require("./helpers.js");
 function Job(workerUrl, args) {
 
     var _this = this;
+    var _worker = new Worker(workerUrl);
 
     var callbacks = {
         done: null,
@@ -59,7 +60,7 @@ function Job(workerUrl, args) {
             args: serialized.args
         };
 
-        _this._worker.postMessage(data, serialized.transferrable);
+        _worker.postMessage(data, serialized.transferrable);
     }
 
     function _onMessage(event) {
@@ -95,7 +96,7 @@ function Job(workerUrl, args) {
     }
 
     function terminate() {
-        _this._worker.terminate();
+        _worker.terminate();
         results.terminated = [];
         _callCallbacks();
     }
@@ -138,10 +139,8 @@ function Job(workerUrl, args) {
 
     this.terminate = terminate;
 
-    this._worker = new Worker(workerUrl);
-
-    this._worker.addEventListener("message", _onMessage.bind(this), false);
-    this._worker.addEventListener("error", _onError.bind(this), false);
+    _worker.addEventListener("message", _onMessage.bind(this), false);
+    _worker.addEventListener("error", _onError.bind(this), false);
 
     _postMessage("threadify-start", args);
 }
