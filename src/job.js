@@ -1,13 +1,4 @@
-
-function _postMessage(worker, data) {
-    // TODO add support of transferrable objects
-
-    var transferrable = [];
-    data = data || {};
-    data.args = data.args || [];
-
-    worker.postMessage(data, transferrable);
-}
+var helpers = require("./helpers.js");
 
 function Job(workerUrl, args) {
 
@@ -25,23 +16,32 @@ function Job(workerUrl, args) {
         terminated: null
     };
 
+    function _postMessage(name, args) {
+        var serialized = helpers.serializeArgs(args || []);
+
+        var data = {
+            name: name,
+            args: serialized.args
+        };
+
+        _this._worker.postMessage(data, serialized.transferrable);
+    }
+
     function _onMessage(event) {
         var data = event.data || {};
-        data.args = data.args || [];
+        var args = helpers.unserializeArgs(data.args || []);
 
-        switch (data.messageType) {
+        switch (data.name) {
             case "threadify-return":
-                results.done = data.args;
-                _callCallbacks();
+                results.done = args;
                 break;
             case "threadify-error":
-                results.failed = data.args;
-                _callCallbacks();
+                results.failed = args;
                 break;
             case "threadify-terminated":
                 results.terminated = [];
-                _callCallbacks();
         }
+        _callCallbacks();
     }
 
     function _onError(error) {
@@ -108,7 +108,7 @@ function Job(workerUrl, args) {
     this._worker.addEventListener("message", _onMessage.bind(this), false);
     this._worker.addEventListener("error", _onError.bind(this), false);
 
-    _postMessage(this._worker, {messageType: "threadify-start", args: args});
+    _postMessage("threadify-start", args);
 }
 
 module.exports = Job;

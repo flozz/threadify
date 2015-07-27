@@ -1,3 +1,4 @@
+var helpers = require("./helpers.js");
 var Job = require("./job.js");
 var workerCode = require("./workercode.js");
 
@@ -8,6 +9,10 @@ function factory(workerFunction) {
             workerCode.toString(),
             ")(",
             workerFunction.toString(),
+            ",",
+            helpers.serializeArgs.toString(),
+            ",",
+            helpers.unserializeArgs.toString(),
             ");"
         ],
         {

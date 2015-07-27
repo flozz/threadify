@@ -14,6 +14,16 @@ module.exports = function(grunt) {
                         'standalone': '<%= pkg.name %>'
                     }
                 }
+            },
+           testHelpers: {
+                files: {
+                  'test/_tmp/helpers.js': ['src/helpers.js'],
+                },
+                options: {
+                    browserifyOptions: {
+                        'standalone': 'testHelpers'
+                    }
+                }
             }
         },
 
@@ -42,7 +52,7 @@ module.exports = function(grunt) {
         },
 
         jscs: {
-            src: ["src/*.js", "test/*Spec.js"],
+            src: ['src/*.js', 'test/*Spec.js'],
             options: {
                 config: ".jscsrc"
             }
@@ -50,7 +60,10 @@ module.exports = function(grunt) {
 
         jasmine: {
             pivotal: {
-                src: 'dist/<%= pkg.name %>.js',
+                src: [
+                    'dist/<%= pkg.name %>.js',
+                    'test/_tmp/*.js'
+                ],
                 options: {
                     specs: 'test/*Spec.js'
                 }
@@ -67,7 +80,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-jscs");
 
     // Default task(s).
-    grunt.registerTask('default', ['browserify', 'uglify']);
-    grunt.registerTask('test', ['jshint', 'jscs', /*, 'browserify', 'jasmine'*/]);
+    grunt.registerTask('default', ['browserify:dist', 'uglify']);
+    grunt.registerTask('test', ['jshint', 'jscs', 'browserify:testHelpers', 'browserify:dist' /*, 'jasmine'*/]);
 
 };
