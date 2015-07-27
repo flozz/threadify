@@ -1,14 +1,3 @@
-
-function _postMessage(worker, data) {
-    // TODO add support of transferrable objects
-
-    var transferrable = [];
-    data = data || {};
-    data.args = data.args || [];
-
-    worker.postMessage(data, transferrable);
-}
-
 function Job(workerUrl, args) {
 
     var _this = this;
@@ -24,6 +13,16 @@ function Job(workerUrl, args) {
         failed: null,
         terminated: null
     };
+
+    function _postMessage(data) {
+        // TODO add support of transferrable objects
+
+        var transferrable = [];
+        data = data || {};
+        data.args = data.args || [];
+
+        _this._worker.postMessage(data, transferrable);
+    }
 
     function _onMessage(event) {
         var data = event.data || {};
@@ -108,7 +107,7 @@ function Job(workerUrl, args) {
     this._worker.addEventListener("message", _onMessage.bind(this), false);
     this._worker.addEventListener("error", _onError.bind(this), false);
 
-    _postMessage(this._worker, {messageType: "threadify-start", args: args});
+    _postMessage({messageType: "threadify-start", args: args});
 }
 
 module.exports = Job;
