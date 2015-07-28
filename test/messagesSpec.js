@@ -3,10 +3,27 @@
 describe("messages", function () {
     it("can pass simple values (String, Number, Boolean, Object, Array, null, undefined, NaN) between the main thread and the worker", function (done) {
         var callbacks = {
-            done: function () {},
+            done: function (values) {
+                expect(values.length).toEqual(9);
+                expect(values[0]).toBe("test");
+                expect(values[1]).toBe(42);
+                expect(values[2]).toBe(true);
+                expect(values[3]).toBe(false);
+
+                expect(values[4].length).toEqual(2);
+                expect(values[4][0]).toBe(1);
+                expect(values[4][2]).toBe(2);
+
+                expect(values[5].a).toBe(1);
+                expect(values[5].b).toBe(2);
+
+                expect(values[6]).toBe(null);
+                expect(values[7]).toBe(undefined);
+                expect(values[8]).toBeNaN();
+            },
             failed: function () {},
             terminated: function () {
-                expect(callbacks.done).toHaveBeenCalledWith(["test", 42, true, false, [1, 2], {a: 1, b: 2}, null, undefined, NaN]);
+                expect(callbacks.done).toHaveBeenCalled();
                 expect(callbacks.failed).not.toHaveBeenCalled();
                 expect(callbacks.terminated).toHaveBeenCalled();
                 done();
