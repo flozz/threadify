@@ -1,5 +1,5 @@
 module.exports = function(config) {
-    config.set({
+    var cfg = {
         frameworks: ['jasmine'],
         files: [
             'dist/threadify.js',
@@ -13,6 +13,19 @@ module.exports = function(config) {
         autoWatch: false,
         browsers: ['Firefox', 'Chrome'],
         captureTimeout: 60000,
-        singleRun: true
-    });
+        singleRun: true,
+
+        customLaunchers: {
+            Chrome_travis_ci: {
+                base: 'Chrome',
+                flags: ['--no-sandbox']
+            }
+        },
+    };
+
+    if (process.env.TRAVIS) {
+        cfg.browsers = ['Firefox', 'Chrome_travis_ci'];
+    }
+
+    config.set(cfg);
 };
