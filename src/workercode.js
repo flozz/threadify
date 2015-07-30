@@ -30,7 +30,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        this.postMessage(data, serialized.transferrable);
+        this.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {

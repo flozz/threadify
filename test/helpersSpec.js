@@ -31,8 +31,8 @@ describe("helpers", function () {
             expect(result.args[7].type).toEqual("arg");
             expect(result.args[7].value).toBe(undefined);
 
-            expect(result.transferrable).toBeDefined();
-            expect(result.transferrable.length).toBe(0);
+            expect(result.transferable).toBeDefined();
+            expect(result.transferable.length).toBe(0);
         });
     });
 

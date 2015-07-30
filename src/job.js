@@ -25,7 +25,7 @@ function Job(workerUrl, args) {
             args: serialized.args
         };
 
-        _worker.postMessage(data, serialized.transferrable);
+        _worker.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {

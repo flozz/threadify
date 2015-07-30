@@ -2,7 +2,7 @@ module.exports =  {
 
     serializeArgs: function (args) {
         var serializedArgs = [];
-        var transferrable = [];
+        var transferable = [];
 
         for (var i = 0 ; i < args.length ; i++) {
             if (args[i] instanceof Error) {
@@ -15,7 +15,6 @@ module.exports =  {
                     obj.value[keys[k]] = args[i][keys[k]];
                 }
                 serializedArgs.push(obj);
-
             } else {
                 serializedArgs.push({
                     type: "arg",
@@ -26,7 +25,7 @@ module.exports =  {
 
         return {
             args: serializedArgs,
-            transferrable: transferrable
+            transferable: transferable
         };
     },
 
