@@ -124,6 +124,56 @@ The worker still alive until you return something or you terminate it explicitly
 **NOTE:** if you just use the `return` keyword without any value, the worker will not be terminated.
 
 
+## About Web Workers Limitations
+
+Web workers are executed in an other thread than your main script / page, this causes some limitations detailed bellow.
+
+### Accessible Objects
+
+From the worker (the threadified function) you cannot access to all browser's objects you are used to. For instance, this is some objects that are not accessible:
+
+* the `window` object,
+
+* the `document` object ,
+
+* DOM / DOM elements (you cannot manipulate the HTML of your page),
+
+* other functions / classes / objects / variables of your main thread (you cannot access to anything outside your threadified function),
+
+* ...
+
+### Arguements and Returned Values
+
+You cannot send / return any type of argument to / from a worker. Threadify allows you to send / return:
+
+* Simple types / values (copied):
+  * `Number`
+  * `String`
+  * `Boolean`
+  * `Array`¹
+  * `Object`¹
+  * `undefined`
+  * `null`
+  * `Infinity`
+  * `NaN`
+
+* `Error` objects (copied)
+
+* ~~`Blob` and `File` (transfered)~~ **TODO**
+
+* `ArrayBuffer` (transfered)
+
+* ~~Typed arrays (transfered)~~ **TODO**
+
+* ~~`DataView` (transfered)~~ **TODO**
+
+* ~~Canvas image data (transfered)~~ **TODO**
+
+Depending on their types, arguments can be copied or transfered to the worker. A transfered argument means that its access is transfered to the worker and that it will no more be accessible from the main thread.
+
+**NOTE¹:** Only if they contains allowed types (no class, no function,...)
+
+
 ## Job API
 
 You get the `Job` object each time you call a threadified function:
