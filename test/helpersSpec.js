@@ -34,6 +34,18 @@ describe("helpers", function () {
             expect(result.transferable).toBeDefined();
             expect(result.transferable.length).toBe(0);
         });
+
+        it("can mark ArrayBuffer as transferable", function () {
+            var result = testHelpers.serializeArgs([new ArrayBuffer(32)]);
+
+            expect(result.args).toBeDefined();
+            expect(result.args.length).toEqual(1);
+
+            expect(result.transferable).toBeDefined();
+            expect(result.transferable.length).toBe(1);
+
+            expect(result.transferable[0] instanceof ArrayBuffer).toBeTruthy();
+        });
     });
 
     describe("unserializeArgs", function () {

@@ -12,7 +12,7 @@ describe("messages", function () {
 
                 expect(values[4].length).toEqual(2);
                 expect(values[4][0]).toBe(1);
-                expect(values[4][2]).toBe(2);
+                expect(values[4][1]).toBe(2);
 
                 expect(values[5].a).toBe(1);
                 expect(values[5].b).toBe(2);
@@ -30,7 +30,7 @@ describe("messages", function () {
             }
         };
 
-        spyOn(callbacks, "done");
+        spyOn(callbacks, "done").and.callThrough();
         spyOn(callbacks, "failed");
         spyOn(callbacks, "terminated").and.callThrough();
 
@@ -107,6 +107,48 @@ describe("messages", function () {
         });
 
         var job = fn(obj);
+
+        job.done = callbacks.done;
+        job.failed = callbacks.failed;
+        job.terminated = callbacks.terminated;
+    });
+
+    it("can transfer ArrayBuffer between the main thread and the worker", function (done) {
+        var buff = new ArrayBuffer(32);
+
+        var view = new DataView(buff);
+        view.setInt8(0, 42);
+
+        var callbacks = {
+            done: function (a) {
+                expect(new DataView(a).getInt8(0)).toEqual(42);
+            },
+            failed: function () {},
+            terminated: function () {
+                expect(callbacks.done).toHaveBeenCalled();
+                expect(callbacks.failed).not.toHaveBeenCalled();
+                expect(callbacks.terminated).toHaveBeenCalled();
+                done();
+            }
+        };
+
+        spyOn(callbacks, "done").and.callThrough();
+        spyOn(callbacks, "failed");
+        spyOn(callbacks, "terminated").and.callThrough();
+
+        var fn = threadify(function (a) {
+            var thread = this;
+            setTimeout(function () {
+                thread.return(a);
+            }, 100);
+        });
+
+        expect(view.getInt8(0)).toEqual(42);
+        expect(view.byteLength).toEqual(32);
+
+        var job = fn(buff);
+
+        expect(view.byteLength).toEqual(0);  // transfered
 
         job.done = callbacks.done;
         job.failed = callbacks.failed;

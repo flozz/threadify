@@ -16,6 +16,9 @@ module.exports =  {
                 }
                 serializedArgs.push(obj);
             } else {
+                if (args[i] instanceof ArrayBuffer) {
+                    transferable.push(args[i]);
+                }
                 serializedArgs.push({
                     type: "arg",
                     value: args[i]

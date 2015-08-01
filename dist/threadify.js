@@ -3,7 +3,7 @@ module.exports =  {
 
     serializeArgs: function (args) {
         var serializedArgs = [];
-        var transferrable = [];
+        var transferable = [];
 
         for (var i = 0 ; i < args.length ; i++) {
             if (args[i] instanceof Error) {
@@ -16,8 +16,10 @@ module.exports =  {
                     obj.value[keys[k]] = args[i][keys[k]];
                 }
                 serializedArgs.push(obj);
-
             } else {
+                if (args[i] instanceof ArrayBuffer) {
+                    transferable.push(args[i]);
+                }
                 serializedArgs.push({
                     type: "arg",
                     value: args[i]
@@ -27,7 +29,7 @@ module.exports =  {
 
         return {
             args: serializedArgs,
-            transferrable: transferrable
+            transferable: transferable
         };
     },
 
@@ -81,7 +83,7 @@ function Job(workerUrl, args) {
             args: serialized.args
         };
 
-        _worker.postMessage(data, serialized.transferrable);
+        _worker.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
@@ -236,7 +238,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        this.postMessage(data, serialized.transferrable);
+        this.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
