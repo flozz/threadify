@@ -35,11 +35,26 @@ describe("helpers", function () {
             expect(result.transferable.length).toBe(0);
         });
 
-        it("can mark ArrayBuffer as transferable", function () {
+        it("can marks ArrayBuffer as transferable", function () {
             var result = testHelpers.serializeArgs([new ArrayBuffer(32)]);
 
             expect(result.args).toBeDefined();
             expect(result.args.length).toEqual(1);
+
+            expect(result.transferable).toBeDefined();
+            expect(result.transferable.length).toBe(1);
+
+            expect(result.transferable[0] instanceof ArrayBuffer).toBeTruthy();
+        });
+
+        it("can serializes TypedArray and mark it as transferable", function () {
+            var result = testHelpers.serializeArgs([new Uint8Array(32)]);
+
+            expect(result.args).toBeDefined();
+            expect(result.args.length).toEqual(1);
+            expect(result.args[0].type).toEqual("TypedArray");
+            expect(result.args[0].arrayType).toEqual("Uint8Array");
+            expect(result.args[0].value instanceof ArrayBuffer).toBeTruthy();
 
             expect(result.transferable).toBeDefined();
             expect(result.transferable.length).toBe(1);

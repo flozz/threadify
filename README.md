@@ -163,7 +163,16 @@ You cannot send / return any type of argument to / from a worker. Threadify allo
 
 * `ArrayBuffer` (transfered)
 
-* ~~Typed arrays (transfered)~~ **TODO**
+* Typed arrays (transfered):
+  * `Int8Array`
+  * `Uint8Array`
+  * `Uint8ClampedArray`
+  * `Int16Array`
+  * `Uint16Array`
+  * `Int32Array`
+  * `Uint32Array`
+  * `Float32Array`
+  * `Float64Array`
 
 * ~~`DataView` (transfered)~~ **TODO**
 

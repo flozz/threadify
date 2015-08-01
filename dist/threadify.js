@@ -1,7 +1,19 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.threadify = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
 module.exports =  {
 
     serializeArgs: function (args) {
+        var typedArray = {
+            Int8Array: Int8Array,
+            Uint8Array: Uint8Array,
+            Uint8ClampedArray: Uint8ClampedArray,
+            Int16Array: Int16Array,
+            Uint16Array: Uint16Array,
+            Int32Array: Int32Array,
+            Uint32Array: Uint32Array,
+            Float32Array: Float32Array,
+            Float64Array: Float64Array
+        };
         var serializedArgs = [];
         var transferable = [];
 
@@ -17,13 +29,33 @@ module.exports =  {
                 }
                 serializedArgs.push(obj);
             } else {
-                if (args[i] instanceof ArrayBuffer) {
-                    transferable.push(args[i]);
+                var result = null;
+
+                // TypedArray
+                for (var t in typedArray) {
+                    if (args[i] instanceof typedArray[t]) {
+                        transferable.push(args[i].buffer);
+                        result = {
+                            type: "TypedArray",
+                            arrayType: t,
+                            value: args[i].buffer
+                        };
+                        break;
+                    }
                 }
-                serializedArgs.push({
-                    type: "arg",
-                    value: args[i]
-                });
+
+                // Other
+                if (!result) {
+                    if (args[i] instanceof ArrayBuffer) {
+                        transferable.push(args[i]);
+                    }
+                    result = {
+                        type: "arg",
+                        value: args[i]
+                    };
+                }
+
+                serializedArgs.push(result);
             }
         }
 
@@ -42,6 +74,9 @@ module.exports =  {
                 case "arg":
                     args.push(serializedArgs[i].value);
                     break;
+                case "TypedArray":
+                    args.push(new global[serializedArgs[i].arrayType](serializedArgs[i].value));
+                    break;
                 case "Error":
                     var obj = new Error();
                     for (var key in serializedArgs[i].value) {
@@ -55,6 +90,7 @@ module.exports =  {
     }
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],2:[function(require,module,exports){
 var helpers = require("./helpers.js");
 
@@ -178,7 +214,7 @@ var workerCode = require("./workercode.js");
 function factory(workerFunction) {
     var workerBlob = new Blob(
         [
-            "(",
+            "var global=this;(",
             workerCode.toString(),
             ")(",
             workerFunction.toString(),
@@ -206,18 +242,17 @@ function factory(workerFunction) {
 module.exports = factory;
 
 },{"./helpers.js":1,"./job.js":2,"./workercode.js":4}],4:[function(require,module,exports){
+(function (global){
 //
 // This file contains the code that will be injected inside the web worker
 //
 
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
 
-    var _worker = this;
-
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
-            _worker.close();
+            global.close();
         },
 
         error: function () {
@@ -264,5 +299,6 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
     this.addEventListener("message", _onMessage, false);
 };
 
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[3])(3)
 });

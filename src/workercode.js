@@ -4,12 +4,10 @@
 
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
 
-    var _worker = this;
-
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
-            _worker.close();
+            global.close();
         },
 
         error: function () {

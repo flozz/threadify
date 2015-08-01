@@ -122,6 +122,7 @@ describe("messages", function () {
         var callbacks = {
             done: function (a) {
                 expect(new DataView(a).getInt8(0)).toEqual(42);
+                expect(new DataView(a).byteLength).toEqual(32);
             },
             failed: function () {},
             terminated: function () {
@@ -149,6 +150,48 @@ describe("messages", function () {
         var job = fn(buff);
 
         expect(view.byteLength).toEqual(0);  // transfered
+
+        job.done = callbacks.done;
+        job.failed = callbacks.failed;
+        job.terminated = callbacks.terminated;
+    });
+
+    it("can transfer TypedArray between the main thread and the worker", function (done) {
+        var arr = new Uint8Array(32);
+        arr[0] = 42;
+
+        var callbacks = {
+            done: function (a) {
+                expect(a instanceof Uint8Array).toBeTruthy();
+                expect(a[0]).toEqual(42);
+                expect(a.length).toEqual(32);
+            },
+            failed: function () {},
+            terminated: function () {
+                expect(callbacks.done).toHaveBeenCalled();
+                expect(callbacks.failed).not.toHaveBeenCalled();
+                expect(callbacks.terminated).toHaveBeenCalled();
+                done();
+            }
+        };
+
+        spyOn(callbacks, "done").and.callThrough();
+        spyOn(callbacks, "failed");
+        spyOn(callbacks, "terminated").and.callThrough();
+
+        var fn = threadify(function (a) {
+            var thread = this;
+            setTimeout(function () {
+                thread.return(a);
+            }, 100);
+        });
+
+        expect(arr[0]).toEqual(42);
+        expect(arr.length).toEqual(32);
+
+        var job = fn(arr);
+
+        expect(arr.length).toEqual(0);  // transfered
 
         job.done = callbacks.done;
         job.failed = callbacks.failed;
