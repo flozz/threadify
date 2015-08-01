@@ -197,6 +197,50 @@ describe("messages", function () {
         job.failed = callbacks.failed;
         job.terminated = callbacks.terminated;
     });
+
+    it("can transfer DataView between the main thread and the worker", function (done) {
+        var buff = new ArrayBuffer(32);
+
+        var view = new DataView(buff);
+        view.setInt8(0, 42);
+
+        var callbacks = {
+            done: function (a) {
+                expect(a instanceof DataView).toBeTruthy();
+                expect(a.getInt8(0)).toEqual(42);
+                expect(a.byteLength).toEqual(32);
+            },
+            failed: function () {},
+            terminated: function () {
+                expect(callbacks.done).toHaveBeenCalled();
+                expect(callbacks.failed).not.toHaveBeenCalled();
+                expect(callbacks.terminated).toHaveBeenCalled();
+                done();
+            }
+        };
+
+        spyOn(callbacks, "done").and.callThrough();
+        spyOn(callbacks, "failed");
+        spyOn(callbacks, "terminated").and.callThrough();
+
+        var fn = threadify(function (a) {
+            var thread = this;
+            setTimeout(function () {
+                thread.return(a);
+            }, 100);
+        });
+
+        expect(view.getInt8(0)).toEqual(42);
+        expect(view.byteLength).toEqual(32);
+
+        var job = fn(view);
+
+        expect(view.byteLength).toEqual(0);  // transfered
+
+        job.done = callbacks.done;
+        job.failed = callbacks.failed;
+        job.terminated = callbacks.terminated;
+    });
 });
 
 // jscs:enable

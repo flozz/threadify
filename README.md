@@ -174,7 +174,7 @@ You cannot send / return any type of argument to / from a worker. Threadify allo
   * `Float32Array`
   * `Float64Array`
 
-* ~~`DataView` (transfered)~~ **TODO**
+* `DataView` (transfered)
 
 * ~~Canvas image data (transfered)~~ **TODO**
 

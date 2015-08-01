@@ -1,17 +1,18 @@
 module.exports =  {
 
     serializeArgs: function (args) {
-        var typedArray = {
-            Int8Array: Int8Array,
-            Uint8Array: Uint8Array,
-            Uint8ClampedArray: Uint8ClampedArray,
-            Int16Array: Int16Array,
-            Uint16Array: Uint16Array,
-            Int32Array: Int32Array,
-            Uint32Array: Uint32Array,
-            Float32Array: Float32Array,
-            Float64Array: Float64Array
-        };
+        var typedArray = [
+            "Int8Array",
+            "Uint8Array",
+            "Uint8ClampedArray",
+            "Int16Array",
+            "Uint16Array",
+            "Int32Array",
+            "Uint32Array",
+            "Float32Array",
+            "Float64Array",
+            "DataView"       // this is not a TypedArray, but it works the same way
+        ];
         var serializedArgs = [];
         var transferable = [];
 
@@ -30,12 +31,12 @@ module.exports =  {
                 var result = null;
 
                 // TypedArray
-                for (var t in typedArray) {
-                    if (args[i] instanceof typedArray[t]) {
+                for (var t = 0 ; t < typedArray.length ; t++) {
+                    if (args[i] instanceof global[typedArray[t]]) {
                         transferable.push(args[i].buffer);
                         result = {
                             type: "TypedArray",
-                            arrayType: t,
+                            arrayType: typedArray[t],
                             value: args[i].buffer
                         };
                         break;
