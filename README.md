@@ -157,9 +157,9 @@ You cannot send / return any type of argument to / from a worker. Threadify allo
   * `Infinity`
   * `NaN`
 
-* `Error` objects (copied)
+* `Blob`, ~~`File`~~ (copied)  *TODO: check if File works*
 
-* ~~`Blob` and `File` (transfered)~~ **TODO**
+* `Error` objects (copied)
 
 * `ArrayBuffer` (transfered)
 

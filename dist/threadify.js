@@ -13,7 +13,7 @@ module.exports =  {
             "Uint32Array",
             "Float32Array",
             "Float64Array",
-            "DataView"
+            "DataView"       // this is not a TypedArray, but it works the same way
         ];
         var serializedArgs = [];
         var transferable = [];

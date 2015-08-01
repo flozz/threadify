@@ -241,6 +241,42 @@ describe("messages", function () {
         job.failed = callbacks.failed;
         job.terminated = callbacks.terminated;
     });
+
+    it("can copy Blob between the main thread and the worker", function (done) {
+        var blob = new Blob(["hello"], {type: "text/x-test"});
+
+        var callbacks = {
+            done: function (b) {
+                expect(b instanceof Blob).toBeTruthy();
+                expect(b.size).toEqual(5);
+                expect(b.type).toEqual("text/x-test");
+            },
+            failed: function () {},
+            terminated: function () {
+                expect(callbacks.done).toHaveBeenCalled();
+                expect(callbacks.failed).not.toHaveBeenCalled();
+                expect(callbacks.terminated).toHaveBeenCalled();
+                done();
+            }
+        };
+
+        spyOn(callbacks, "done").and.callThrough();
+        spyOn(callbacks, "failed");
+        spyOn(callbacks, "terminated").and.callThrough();
+
+        var fn = threadify(function (a) {
+            var thread = this;
+            setTimeout(function () {
+                thread.return(a);
+            }, 100);
+        });
+
+        var job = fn(blob);
+
+        job.done = callbacks.done;
+        job.failed = callbacks.failed;
+        job.terminated = callbacks.terminated;
+    });
 });
 
 // jscs:enable
