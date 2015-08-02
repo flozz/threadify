@@ -1,6 +1,8 @@
 module.exports =  {
 
     serializeArgs: function (args) {
+        "use strict";
+
         var typedArray = [
             "Int8Array",
             "Uint8Array",
@@ -65,6 +67,8 @@ module.exports =  {
     },
 
     unserializeArgs: function (serializedArgs) {
+        "use strict";
+
         var args = [];
 
         for (var i = 0 ; i < serializedArgs.length ; i++) {

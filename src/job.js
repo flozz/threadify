@@ -1,3 +1,5 @@
+"use strict";
+
 var helpers = require("./helpers.js");
 
 function Job(workerUrl, args) {

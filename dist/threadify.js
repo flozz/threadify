@@ -3,6 +3,8 @@
 module.exports =  {
 
     serializeArgs: function (args) {
+        "use strict";
+
         var typedArray = [
             "Int8Array",
             "Uint8Array",
@@ -67,6 +69,8 @@ module.exports =  {
     },
 
     unserializeArgs: function (serializedArgs) {
+        "use strict";
+
         var args = [];
 
         for (var i = 0 ; i < serializedArgs.length ; i++) {
@@ -93,6 +97,8 @@ module.exports =  {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],2:[function(require,module,exports){
+"use strict";
+
 var helpers = require("./helpers.js");
 
 function Job(workerUrl, args) {
@@ -208,6 +214,8 @@ function Job(workerUrl, args) {
 module.exports = Job;
 
 },{"./helpers.js":1}],3:[function(require,module,exports){
+"use strict";
+
 var helpers = require("./helpers.js");
 var Job = require("./job.js");
 var workerCode = require("./workercode.js");
@@ -249,6 +257,7 @@ module.exports = factory;
 //
 
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
+    "use strict";
 
     var thread = {
         terminate: function () {
@@ -274,7 +283,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        this.postMessage(data, serialized.transferable);
+        global.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
@@ -297,7 +306,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
         }
     }
 
-    this.addEventListener("message", _onMessage, false);
+    global.addEventListener("message", _onMessage, false);
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})

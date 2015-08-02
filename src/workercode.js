@@ -3,6 +3,7 @@
 //
 
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
+    "use strict";
 
     var thread = {
         terminate: function () {
@@ -28,7 +29,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        this.postMessage(data, serialized.transferable);
+        global.postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
@@ -51,5 +52,5 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
         }
     }
 
-    this.addEventListener("message", _onMessage, false);
+    global.addEventListener("message", _onMessage, false);
 };

@@ -1,3 +1,5 @@
+"use strict";
+
 var helpers = require("./helpers.js");
 var Job = require("./job.js");
 var workerCode = require("./workercode.js");
