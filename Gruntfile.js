@@ -47,7 +47,10 @@ module.exports = function(grunt) {
                 nonew: true,
                 undef: true,
                 node: true,
-                browser: true
+                browser: true,
+                globals: {
+                    ImageData: false
+                }
             }
         },
 

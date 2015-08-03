@@ -52,9 +52,8 @@ describe("helpers", function () {
 
             expect(result.args).toBeDefined();
             expect(result.args.length).toEqual(1);
-            expect(result.args[0].type).toEqual("TypedArray");
-            expect(result.args[0].arrayType).toEqual("Uint8Array");
-            expect(result.args[0].value instanceof ArrayBuffer).toBeTruthy();
+            expect(result.args[0].type).toEqual("arg");
+            expect(result.args[0].value instanceof Uint8Array).toBeTruthy();
 
             expect(result.transferable).toBeDefined();
             expect(result.transferable.length).toBe(1);

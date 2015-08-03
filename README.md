@@ -176,7 +176,7 @@ You cannot send / return any type of argument to / from a worker. Threadify allo
 
 * `DataView` (transfered)
 
-* ~~Canvas image data (transfered)~~ **TODO**
+* Canvas `ImageData` (transfered)
 
 Depending on their types, arguments can be copied or transfered to the worker. A transfered argument means that its access is transfered to the worker and that it will no more be accessible from the main thread.
 

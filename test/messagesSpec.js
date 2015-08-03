@@ -277,6 +277,56 @@ describe("messages", function () {
         job.failed = callbacks.failed;
         job.terminated = callbacks.terminated;
     });
+
+    it("can transfer canvas image data between the main thread and the worker", function (done) {
+        var canvas = document.createElement("canvas");
+        canvas.width = 10;
+        canvas.height = 10;
+        var ctx = canvas.getContext("2d");
+        ctx.fillRect(0, 0, 1, 1);
+        var data = ctx.getImageData(0, 0, 10, 10);
+
+        var callbacks = {
+            done: function (d) {
+                expect(d instanceof ImageData).toBeTruthy();
+                expect(d.data[2]).toEqual(0);
+                expect(d.data[3]).toEqual(255);
+                expect(d.data[4]).toEqual(0);
+            },
+            failed: function () {},
+            terminated: function () {
+                expect(callbacks.done).toHaveBeenCalled();
+                expect(callbacks.failed).not.toHaveBeenCalled();
+                expect(callbacks.terminated).toHaveBeenCalled();
+                done();
+            }
+        };
+
+        spyOn(callbacks, "done").and.callThrough();
+        spyOn(callbacks, "failed");
+        spyOn(callbacks, "terminated").and.callThrough();
+
+        var fn = threadify(function (a) {
+            var thread = this;
+            setTimeout(function () {
+                thread.return(a);
+            }, 100);
+        });
+
+        expect(data.data[2]).toEqual(0);
+        expect(data.data[3]).toEqual(255);
+        expect(data.data[4]).toEqual(0);
+
+        var job = fn(data);
+
+        expect(data.data[2]).not.toBeDefined();  // transfered
+        expect(data.data[3]).not.toBeDefined();  // transfered
+        expect(data.data[4]).not.toBeDefined();  // transfered
+
+        job.done = callbacks.done;
+        job.failed = callbacks.failed;
+        job.terminated = callbacks.terminated;
+    });
 });
 
 // jscs:enable

@@ -32,33 +32,28 @@ module.exports =  {
                 }
                 serializedArgs.push(obj);
             } else {
-                var result = null;
+                // transferable: ArrayBuffer
+                if (args[i] instanceof ArrayBuffer) {
+                    transferable.push(args[i]);
 
-                // TypedArray
-                for (var t = 0 ; t < typedArray.length ; t++) {
-                    if (args[i] instanceof global[typedArray[t]]) {
-                        transferable.push(args[i].buffer);
-                        result = {
-                            type: "TypedArray",
-                            arrayType: typedArray[t],
-                            value: args[i].buffer
-                        };
-                        break;
+                // tranferable: ImageData
+                } else if (args[i] instanceof ImageData) {
+                    transferable.push(args[i].data.buffer);
+
+                // tranferable: TypedArray
+                } else {
+                    for (var t = 0 ; t < typedArray.length ; t++) {
+                        if (args[i] instanceof global[typedArray[t]]) {
+                            transferable.push(args[i].buffer);
+                            break;
+                        }
                     }
                 }
 
-                // Other
-                if (!result) {
-                    if (args[i] instanceof ArrayBuffer) {
-                        transferable.push(args[i]);
-                    }
-                    result = {
-                        type: "arg",
-                        value: args[i]
-                    };
-                }
-
-                serializedArgs.push(result);
+                serializedArgs.push({
+                    type: "arg",
+                    value: args[i]
+                });
             }
         }
 
@@ -78,9 +73,6 @@ module.exports =  {
             switch (serializedArgs[i].type) {
                 case "arg":
                     args.push(serializedArgs[i].value);
-                    break;
-                case "TypedArray":
-                    args.push(new global[serializedArgs[i].arrayType](serializedArgs[i].value));
                     break;
                 case "Error":
                     var obj = new Error();
