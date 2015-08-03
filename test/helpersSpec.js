@@ -47,7 +47,7 @@ describe("helpers", function () {
             expect(result.transferable[0] instanceof ArrayBuffer).toBeTruthy();
         });
 
-        it("can serializes TypedArray and mark it as transferable", function () {
+        it("can marks TypedArray as transferable", function () {
             var result = testHelpers.serializeArgs([new Uint8Array(32)]);
 
             expect(result.args).toBeDefined();
@@ -57,7 +57,22 @@ describe("helpers", function () {
 
             expect(result.transferable).toBeDefined();
             expect(result.transferable.length).toBe(1);
+            expect(result.transferable[0] instanceof ArrayBuffer).toBeTruthy();
+        });
 
+        it("can serialize DataView and marks its buffer as transferable", function () {
+            var buff = new ArrayBuffer(32);
+            var view = new DataView(buff);
+
+            var result = testHelpers.serializeArgs([view]);
+
+            expect(result.args).toBeDefined();
+            expect(result.args.length).toEqual(1);
+            expect(result.args[0].type).toEqual("DataView");
+            expect(result.args[0].value instanceof ArrayBuffer).toBeTruthy();
+
+            expect(result.transferable).toBeDefined();
+            expect(result.transferable.length).toBe(1);
             expect(result.transferable[0] instanceof ArrayBuffer).toBeTruthy();
         });
     });

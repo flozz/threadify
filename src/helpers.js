@@ -12,8 +12,7 @@ module.exports =  {
             "Int32Array",
             "Uint32Array",
             "Float32Array",
-            "Float64Array",
-            "DataView"       // this is not a TypedArray, but it works the same way
+            "Float64Array"
         ];
         var serializedArgs = [];
         var transferable = [];
@@ -29,6 +28,12 @@ module.exports =  {
                     obj.value[keys[k]] = args[i][keys[k]];
                 }
                 serializedArgs.push(obj);
+            } else if (args[i] instanceof DataView) {
+                transferable.push(args[i].buffer);
+                serializedArgs.push({
+                    type: "DataView",
+                    value: args[i].buffer
+                });
             } else {
                 // transferable: ArrayBuffer
                 if (args[i] instanceof ArrayBuffer) {
@@ -78,6 +83,9 @@ module.exports =  {
                         obj[key] = serializedArgs[i].value[key];
                     }
                     args.push(obj);
+                    break;
+                case "DataView":
+                    args.push(new DataView(serializedArgs[i].value));
             }
         }
 
