@@ -283,8 +283,8 @@ Then, open the following page in your web browser:
 
 ## Changelog
 
-* **0.1.0:**
-  * First release: basic functionalities required to build and run workers
+* **0.2.0:** Allow to tranfer / copy more types between the main thread and the worker
+* **0.1.0:** First release: basic functionalities required to build and run workers
 
 
 
