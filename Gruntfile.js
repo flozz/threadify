@@ -75,7 +75,7 @@ module.exports = function(grunt) {
 
     });
 
-    // Load the plugin that provides the "uglify" task.
+    // Load the plugins.
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
