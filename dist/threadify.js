@@ -42,7 +42,7 @@ module.exports =  {
                     transferable.push(args[i]);
 
                 // tranferable: ImageData
-                } else if (args[i] instanceof ImageData) {
+                } else if ("ImageData" in global && args[i] instanceof ImageData) {
                     transferable.push(args[i].data.buffer);
 
                 // tranferable: TypedArray
