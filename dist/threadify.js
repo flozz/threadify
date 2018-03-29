@@ -251,7 +251,6 @@ function factory(workerFunction) {
 module.exports = factory;
 
 },{"./helpers.js":1,"./job.js":2,"./workercode.js":4}],4:[function(require,module,exports){
-(function (global){
 //
 // This file contains the code that will be injected inside the web worker
 //
@@ -262,7 +261,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
-            global.close();
+            close();
         },
 
         error: function () {
@@ -283,7 +282,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        global.postMessage(data, serialized.transferable);
+        postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
@@ -306,9 +305,8 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
         }
     }
 
-    global.addEventListener("message", _onMessage, false);
+    addEventListener("message", _onMessage, false);
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}]},{},[3])(3)
 });
