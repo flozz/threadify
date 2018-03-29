@@ -8,7 +8,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
-            global.close();
+            close();
         },
 
         error: function () {
@@ -29,7 +29,7 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             args: serialized.args
         };
 
-        global.postMessage(data, serialized.transferable);
+        postMessage(data, serialized.transferable);
     }
 
     function _onMessage(event) {
@@ -52,5 +52,5 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
         }
     }
 
-    global.addEventListener("message", _onMessage, false);
+    addEventListener("message", _onMessage, false);
 };
