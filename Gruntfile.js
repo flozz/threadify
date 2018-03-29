@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         browserify: {
             dist: {
                 files: {
-                  'dist/<%= pkg.name %>.js': ['src/<%= pkg.name %>.js'],
+                    'dist/<%= pkg.name %>.js': ['src/<%= pkg.name %>.js'],
                 },
                 options: {
                     browserifyOptions: {
@@ -15,9 +15,9 @@ module.exports = function(grunt) {
                     }
                 }
             },
-           testHelpers: {
+            testHelpers: {
                 files: {
-                  'test/_tmp/helpers.js': ['src/helpers.js'],
+                    'test/_tmp/helpers.js': ['src/helpers.js'],
                 },
                 options: {
                     browserifyOptions: {
@@ -49,7 +49,8 @@ module.exports = function(grunt) {
                 node: true,
                 browser: true,
                 globals: {
-                    ImageData: false
+                    ImageData: false,
+                    postMessage: false
                 }
             }
         },
@@ -84,6 +85,6 @@ module.exports = function(grunt) {
 
     // Default task(s).
     grunt.registerTask('default', ['browserify:dist', 'uglify']);
-    grunt.registerTask('test', ['jshint', 'jscs', 'browserify:testHelpers', 'browserify:dist' /*, 'jasmine'*/]);
+    grunt.registerTask('test', ['jshint', 'jscs', 'browserify:testHelpers', 'browserify:dist' /*, 'jasmine'*/ ]);
 
 };
