@@ -65,7 +65,7 @@ module.exports = function(grunt) {
         jasmine: {
             pivotal: {
                 src: [
-                    'dist/<%= pkg.name %>.js',
+                    'dist/<%= pkg.name %>.min.js',
                     'test/_tmp/*.js'
                 ],
                 options: {

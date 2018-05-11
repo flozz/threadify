@@ -7,7 +7,7 @@ var workerCode = require("./workercode.js");
 function factory(workerFunction) {
     var workerBlob = new Blob(
         [
-            "var global=this;(",
+            "var window=this;var global=this;(",
             workerCode.toString(),
             ")(",
             workerFunction.toString(),

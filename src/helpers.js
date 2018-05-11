@@ -40,13 +40,13 @@ module.exports =  {
                     transferable.push(args[i]);
 
                 // tranferable: ImageData
-                } else if ("ImageData" in global && args[i] instanceof ImageData) {
+                } else if ("ImageData" in window && args[i] instanceof ImageData) {
                     transferable.push(args[i].data.buffer);
 
                 // tranferable: TypedArray
                 } else {
                     for (var t = 0 ; t < typedArray.length ; t++) {
-                        if (args[i] instanceof global[typedArray[t]]) {
+                        if (args[i] instanceof window[typedArray[t]]) {
                             transferable.push(args[i].buffer);
                             break;
                         }
