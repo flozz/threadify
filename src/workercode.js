@@ -5,6 +5,17 @@
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
     "use strict";
 
+    function _postMessage(name, args) {
+        var serialized = serializeArgs(args || []);
+
+        var data = {
+            name: name,
+            args: serialized.args
+        };
+
+        postMessage(data, serialized.transferable);
+    }
+
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
@@ -20,17 +31,6 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             thread.terminate();
         }
     };
-
-    function _postMessage(name, args) {
-        var serialized = serializeArgs(args || []);
-
-        var data = {
-            name: name,
-            args: serialized.args
-        };
-
-        postMessage(data, serialized.transferable);
-    }
 
     function _onMessage(event) {
         var data = event.data || {};

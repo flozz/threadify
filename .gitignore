@@ -2,3 +2,5 @@ node_modules
 *.log
 _api.js
 test/_tmp
+.grunt
+_SpecRunner.html

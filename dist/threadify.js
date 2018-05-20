@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.threadify = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.threadify = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports =  {
 
     serializeArgs: function (args) {
@@ -127,6 +127,15 @@ function Job(workerUrl, args) {
         _worker.postMessage(data, serialized.transferable);
     }
 
+    function _callCallbacks() {
+        for (var cb in callbacks) {
+            if (callbacks[cb] && results[cb]) {
+                callbacks[cb].apply(_this, results[cb]);
+                results[cb] = null;
+            }
+        }
+    }
+
     function _onMessage(event) {
         var data = event.data || {};
         var args = helpers.unserializeArgs(data.args || []);
@@ -144,25 +153,16 @@ function Job(workerUrl, args) {
         _callCallbacks();
     }
 
-    function _onError(error) {
-        results.failed = [error];
-        _callCallbacks();
-        terminate();
-    }
-
-    function _callCallbacks() {
-        for (var cb in callbacks) {
-            if (callbacks[cb] && results[cb]) {
-                callbacks[cb].apply(_this, results[cb]);
-                results[cb] = null;
-            }
-        }
-    }
-
     function terminate() {
         _worker.terminate();
         results.terminated = [];
         _callCallbacks();
+    }
+
+    function _onError(error) {
+        results.failed = [error];
+        _callCallbacks();
+        terminate();
     }
 
     Object.defineProperty(this, "done", {
@@ -256,6 +256,17 @@ module.exports = factory;
 module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
     "use strict";
 
+    function _postMessage(name, args) {
+        var serialized = serializeArgs(args || []);
+
+        var data = {
+            name: name,
+            args: serialized.args
+        };
+
+        postMessage(data, serialized.transferable);
+    }
+
     var thread = {
         terminate: function () {
             _postMessage("threadify-terminated", []);
@@ -271,17 +282,6 @@ module.exports = function (workerFunction, serializeArgs, unserializeArgs) {
             thread.terminate();
         }
     };
-
-    function _postMessage(name, args) {
-        var serialized = serializeArgs(args || []);
-
-        var data = {
-            name: name,
-            args: serialized.args
-        };
-
-        postMessage(data, serialized.transferable);
-    }
 
     function _onMessage(event) {
         var data = event.data || {};

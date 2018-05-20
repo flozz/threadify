@@ -283,6 +283,9 @@ Then, open the following page in your web browser:
 
 ## Changelog
 
+* **0.2.3:**
+    * Fixes issue with minification (#6)
+    * Updates dependencies
 * **0.2.2:** Avoid minification issue (#3)
 * **0.2.1:** Fix for old browsers that do not implement `ImageData`
 * **0.2.0:** Allow to tranfer / copy more types between the main thread and the worker

@@ -30,6 +30,15 @@ function Job(workerUrl, args) {
         _worker.postMessage(data, serialized.transferable);
     }
 
+    function _callCallbacks() {
+        for (var cb in callbacks) {
+            if (callbacks[cb] && results[cb]) {
+                callbacks[cb].apply(_this, results[cb]);
+                results[cb] = null;
+            }
+        }
+    }
+
     function _onMessage(event) {
         var data = event.data || {};
         var args = helpers.unserializeArgs(data.args || []);
@@ -47,25 +56,16 @@ function Job(workerUrl, args) {
         _callCallbacks();
     }
 
-    function _onError(error) {
-        results.failed = [error];
-        _callCallbacks();
-        terminate();
-    }
-
-    function _callCallbacks() {
-        for (var cb in callbacks) {
-            if (callbacks[cb] && results[cb]) {
-                callbacks[cb].apply(_this, results[cb]);
-                results[cb] = null;
-            }
-        }
-    }
-
     function terminate() {
         _worker.terminate();
         results.terminated = [];
         _callCallbacks();
+    }
+
+    function _onError(error) {
+        results.failed = [error];
+        _callCallbacks();
+        terminate();
     }
 
     Object.defineProperty(this, "done", {
