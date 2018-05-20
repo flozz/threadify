@@ -1,6 +1,6 @@
 {
   "name": "threadify",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simply transforms a javascript function into a web worker",
   "main": "src/threadify.js",
   "scripts": {

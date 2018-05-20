@@ -5,3 +5,5 @@ test
 .jscsrc
 _api.js
 karma.conf.js
+.grunt
+_SpecRunner.html

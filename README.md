@@ -283,6 +283,7 @@ Then, open the following page in your web browser:
 
 ## Changelog
 
+* **0.2.4:** Cleaner package (avoid including useless files)
 * **0.2.3:**
     * Fixes issue with minification (#6)
     * Updates dependencies
